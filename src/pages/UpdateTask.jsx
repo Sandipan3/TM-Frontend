@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 export default function UpdateTask() {
   const { title } = useParams();
   const navigate = useNavigate();
-
   const [form, setForm] = useState({
     title: "",
     completed: false,
@@ -14,33 +13,30 @@ export default function UpdateTask() {
     remindAt: "",
   });
 
-  const fetchTask = async () => {
-    try {
-      const res = await api.get("/tasks");
-      const task = res.data.data.find((t) => t.title === title);
-      if (!task) {
-        toast.error("Task not found");
-        navigate("/");
-      } else {
-        // Convert UTC dates to local datetime format for input fields
-        const deadlineDate = new Date(task.deadline);
-        const remindAtDate = new Date(task.remindAt);
+  useEffect(() => {
+    const fetchTask = async () => {
+      try {
+        const res = await api.get("/tasks");
+        const task = res.data.data.find((t) => t.title === title);
+        if (!task) {
+          toast.error("Task not found");
+          navigate("/");
+          return;
+        }
 
         setForm({
           title: task.title,
-          completed: Boolean(task.completed),
-          deadline: deadlineDate.toISOString().split("T")[0], // YYYY-MM-DD
-          remindAt: remindAtDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm
+          completed: task.completed,
+          deadline: task.deadline.split("T")[0], // Get YYYY-MM-DD part
+          remindAt: task.remindAt.slice(0, 16), // Get YYYY-MM-DDTHH:mm part
         });
+      } catch (err) {
+        toast.error(err.response?.data?.message);
       }
-    } catch (err) {
-      toast.error(err.response?.data?.message);
-    }
-  };
+    };
 
-  useEffect(() => {
     fetchTask();
-  }, [title]);
+  }, [title, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,18 +49,17 @@ export default function UpdateTask() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Convert to ISO strings for backend
-      const updateData = {
+      const taskData = {
         ...form,
         deadline: new Date(form.deadline).toISOString(),
         remindAt: new Date(form.remindAt).toISOString(),
       };
 
-      await api.put(`/tasks/${title}`, updateData);
-      toast.success("Task updated successfully");
+      await api.put(`/tasks/${title}`, taskData);
+      toast.success("Task updated");
       navigate("/");
     } catch (err) {
-      toast.error(err.response?.data?.message);
+      toast.error(err.response?.data?.message || "Failed to update task");
     }
   };
 
