@@ -42,7 +42,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="flex justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-200 p-8">
+    <div className="flex justify-center min-h-screen  p-8">
       <div className="max-w-4xl w-full">
         <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           My Tasks

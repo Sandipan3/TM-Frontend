@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import React from "react";
 import MobileNavbar from "../components/MobileNavbar";
 import DesktopNavbar from "../components/DesktopNavbar";
+import Footer from "../components/Footer";
 
 export default function Layout() {
   return (
@@ -20,6 +21,7 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
