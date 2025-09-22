@@ -1,0 +1,131 @@
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../api/api";
+import toast from "react-hot-toast";
+
+export default function UpdateTask() {
+  const { title } = useParams();
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    title: "",
+    completed: false, // Initialize as boolean
+    deadline: "",
+    remindAt: "",
+  });
+
+  const fetchTask = async () => {
+    try {
+      const res = await api.get("/tasks");
+      const task = res.data.data.find((t) => t.title === title);
+      if (!task) {
+        toast.error("Task not found");
+        navigate("/");
+      } else {
+        setForm({
+          title: task.title,
+          completed: Boolean(task.completed), // Ensure completed is boolean
+          deadline: task.deadline.slice(0, 10),
+          remindAt: task.remindAt.slice(0, 16),
+        });
+      }
+    } catch (err) {
+      toast.error(error.response?.data?.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchTask();
+  }, [title]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === "completed" ? value === "true" : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/tasks/${title}`, form);
+      toast.success("Task updated successfully");
+      navigate("/");
+    } catch (err) {
+      toast.error(err.response?.data?.message);
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-md mx-auto">
+      <h1 className="text-xl font-bold mb-4">Update Task</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col">
+          <label htmlFor="title" className="text-left mb-1">
+            Task Title
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            placeholder="Task Title"
+            value={form.title}
+            onChange={handleChange}
+            className="border p-2 rounded-lg"
+            required
+          />
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="completed" className="text-left mb-1">
+            Status
+          </label>
+          <select
+            id="completed"
+            name="completed"
+            value={form.completed.toString()} // Convert boolean to string for select
+            onChange={handleChange}
+            className="border p-2 rounded-lg"
+          >
+            <option value="false">Incomplete</option>
+            <option value="true">Completed</option>
+          </select>
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="deadline" className="text-left mb-1">
+            Deadline
+          </label>
+          <input
+            type="date"
+            id="deadline"
+            name="deadline"
+            value={form.deadline}
+            onChange={handleChange}
+            className="border p-2 rounded-lg"
+            required
+          />
+        </div>
+        <div className="flex flex-col">
+          <label htmlFor="remindAt" className="text-left mb-1">
+            Reminder
+          </label>
+          <input
+            type="datetime-local"
+            id="remindAt"
+            name="remindAt"
+            value={form.remindAt}
+            onChange={handleChange}
+            className="border p-2 rounded-lg"
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          className="bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600"
+        >
+          Update Task
+        </button>
+      </form>
+    </div>
+  );
+}
