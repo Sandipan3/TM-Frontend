@@ -9,7 +9,7 @@ export default function UpdateTask() {
 
   const [form, setForm] = useState({
     title: "",
-    completed: false, // Initialize as boolean
+    completed: false,
     deadline: "",
     remindAt: "",
   });
@@ -22,15 +22,19 @@ export default function UpdateTask() {
         toast.error("Task not found");
         navigate("/");
       } else {
+        // Convert UTC dates to local datetime format for input fields
+        const deadlineDate = new Date(task.deadline);
+        const remindAtDate = new Date(task.remindAt);
+
         setForm({
           title: task.title,
-          completed: Boolean(task.completed), // Ensure completed is boolean
-          deadline: task.deadline.slice(0, 10),
-          remindAt: task.remindAt.slice(0, 16),
+          completed: Boolean(task.completed),
+          deadline: deadlineDate.toISOString().split("T")[0], // YYYY-MM-DD
+          remindAt: remindAtDate.toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm
         });
       }
     } catch (err) {
-      toast.error(error.response?.data?.message);
+      toast.error(err.response?.data?.message);
     }
   };
 
@@ -49,7 +53,14 @@ export default function UpdateTask() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/tasks/${title}`, form);
+      // Convert to ISO strings for backend
+      const updateData = {
+        ...form,
+        deadline: new Date(form.deadline).toISOString(),
+        remindAt: new Date(form.remindAt).toISOString(),
+      };
+
+      await api.put(`/tasks/${title}`, updateData);
       toast.success("Task updated successfully");
       navigate("/");
     } catch (err) {
@@ -83,7 +94,7 @@ export default function UpdateTask() {
           <select
             id="completed"
             name="completed"
-            value={form.completed.toString()} // Convert boolean to string for select
+            value={form.completed.toString()}
             onChange={handleChange}
             className="border p-2 rounded-lg"
           >

@@ -23,17 +23,14 @@ export default function CreateTask() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Create a Date object from the local datetime-local input string
-      const localRemindAtDate = new Date(form.remindAt);
-
-      // Convert the local date to a full UTC ISO string
-      const utcRemindAtString = localRemindAtDate.toISOString();
-
-      // Send the form data with the corrected UTC date string
-      await api.post("/tasks", {
+      // Send dates as ISO strings - backend will convert to UTC
+      const taskData = {
         ...form,
-        remindAt: utcRemindAtString, // Use the new UTC string
-      });
+        deadline: new Date(form.deadline).toISOString(),
+        remindAt: new Date(form.remindAt).toISOString(),
+      };
+
+      await api.post("/tasks", taskData);
 
       toast.success("Task created");
       navigate("/");

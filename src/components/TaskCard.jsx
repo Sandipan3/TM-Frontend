@@ -5,17 +5,26 @@ import React from "react";
 export default function TaskCard({ task, onDelete }) {
   const navigate = useNavigate();
 
+  // Convert UTC dates to local time for display
+  const formatUTCDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
+  const formatUTCDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
+
   return (
     <div className="bg-yellow-100 shadow-lg rounded-xl p-5 flex flex-col gap-3">
       <h2 className="text-xl font-semibold text-gray-800">{task.title}</h2>
       <p className="text-gray-600">
         Status: {task.completed ? "Completed" : "Incomplete"}
       </p>
+      <p className="text-gray-600">Deadline: {formatUTCDate(task.deadline)}</p>
       <p className="text-gray-600">
-        Deadline: {new Date(task.deadline).toLocaleDateString()}
-      </p>
-      <p className="text-gray-600">
-        Remind At: {new Date(task.remindAt).toLocaleString()}
+        Remind At: {formatUTCDateTime(task.remindAt)}
       </p>
       <div className="flex justify-between mt-4">
         <button
