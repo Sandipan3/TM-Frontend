@@ -23,11 +23,22 @@ export default function CreateTask() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post("/tasks", form);
+      // Create a Date object from the local datetime-local input string
+      const localRemindAtDate = new Date(form.remindAt);
+
+      // Convert the local date to a full UTC ISO string
+      const utcRemindAtString = localRemindAtDate.toISOString();
+
+      // Send the form data with the corrected UTC date string
+      await api.post("/tasks", {
+        ...form,
+        remindAt: utcRemindAtString, // Use the new UTC string
+      });
+
       toast.success("Task created");
       navigate("/");
     } catch (error) {
-      toast.error(error.response?.data?.message);
+      toast.error(error.response?.data?.message || "Failed to create task");
     }
   };
 
@@ -57,7 +68,7 @@ export default function CreateTask() {
           <select
             id="completed"
             name="completed"
-            value={form.completed.toString()} // Convert boolean to string for select
+            value={form.completed.toString()}
             onChange={handleChange}
             className="border p-2 rounded-lg"
           >
