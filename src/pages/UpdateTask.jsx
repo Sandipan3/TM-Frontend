@@ -24,11 +24,16 @@ export default function UpdateTask() {
           return;
         }
 
+        const remindAtDate = new Date(task.remindAt);
+        remindAtDate.setMinutes(
+          remindAtDate.getMinutes() - remindAtDate.getTimezoneOffset()
+        );
+
         setForm({
           title: task.title,
           completed: task.completed,
-          deadline: task.deadline.split("T")[0], // Get YYYY-MM-DD part
-          remindAt: task.remindAt.slice(0, 16), // Get YYYY-MM-DDTHH:mm part
+          deadline: task.deadline.split("T")[0],
+          remindAt: remindAtDate.toISOString().slice(0, 16),
         });
       } catch (err) {
         toast.error(err.response?.data?.message);
@@ -59,7 +64,7 @@ export default function UpdateTask() {
       toast.success("Task updated");
       navigate("/");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update task");
+      toast.error(err.response?.data?.message);
     }
   };
 
