@@ -23,7 +23,6 @@ export default function CreateTask() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Send dates as ISO strings - backend will convert to UTC
       const taskData = {
         ...form,
         deadline: new Date(form.deadline).toISOString(),
@@ -31,7 +30,6 @@ export default function CreateTask() {
       };
 
       await api.post("/tasks", taskData);
-
       toast.success("Task created");
       navigate("/");
     } catch (error) {
