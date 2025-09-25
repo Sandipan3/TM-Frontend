@@ -1,7 +1,9 @@
+// vite.config.js
 import { defineConfig } from "vite";
-import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
+
 export default defineConfig({
   plugins: [
     react(),
@@ -11,6 +13,11 @@ export default defineConfig({
       manifest: {
         name: "Task-Management",
         short_name: "TM",
+        description: "A simple task management application.",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
+        display: "standalone",
+        start_url: ".",
         icons: [
           {
             src: "/maskable_icon.png",
@@ -29,10 +36,23 @@ export default defineConfig({
             type: "image/png",
           },
         ],
-        theme_color: "#ffffff",
-        background_color: "#ffffff",
-        display: "standalone",
-        start_url: ".",
+      },
+      workbox: {
+        runtimeCaching: [
+          {
+            // This now matches your API calls like /tasks and /tasks/:title
+            urlPattern: ({ url }) => {
+              return url.pathname.startsWith("/tasks");
+            },
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              cacheableResponse: {
+                statuses: [0, 200], // Cache successful responses & opaque responses
+              },
+            },
+          },
+        ],
       },
     }),
   ],
